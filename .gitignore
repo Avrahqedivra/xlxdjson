@@ -1,0 +1,14 @@
+*.pyc
+config.py
+*.csv
+.DS_Store
+*.log
+log/*.json
+log/*.xml
+/*.json
+logo/*.*
+*.bak
+css/animate.min.css
+.vscode/*.*
+html/container.html
+xmlreader.py

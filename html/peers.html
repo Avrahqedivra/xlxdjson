@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="theme-dark" manifest="xlxdjson.appcache">
+
+<head>
+		<link rel="icon" type="image/x-icon" href="favicon.ico" />
+		<meta charset="UTF-8">
+		<meta http-equiv="refresh" content="20000"/>
+		<title>XLXJSON Monitor</title>
+
+    <link rel="stylesheet" href="theme_template.css">
+    <link rel="stylesheet" href="mysite_template.css">
+    <meta name="description" content="Copyright (c) 2022 Jean-Michel Cohen - F4JDN" />
+
+		<style>
+			.thpeorder {
+				width: 3rem;
+			}
+			.thpecallsign {
+				width: 8rem;
+			}
+			.thpelastheard {
+				width: 8rem;
+			}
+			.thpelinkedfor {
+				width: 9rem;
+			}
+			.thpeprotocol {
+				width: 7rem;
+			}
+			.thpemodule {
+				width: 4rem;
+			}
+			.thpeip {
+				width: 6rem;
+			}
+		</style>
+	</head>
+
+<body>
+	<center>
+		<noscript>You must enable JavaScript</noscript>
+
+		<div id="siteHeader">
+			<div id="sitelogo"><<<site_logo>>></div>
+
+			<div id="buttonArea"><<<button_bar>>><div class="button iconbutton" id="btnlisteners">&#x1F441; 0</div></div>
+
+			<!-- The Modal -->
+			<div id="statisticsModal" class="modal">
+				<!-- Modal content -->
+				<div class="modal-content-statistics">
+					<span class="close close-statistics">&times;</span>
+					<table class="tablefixed">
+						<thead id="theadStatistics" tbodyid="statistics">
+							<tr class="headerRow">
+								<th class="thlstg">TG</th>
+								<th class="thlsCnx">Nb Cnx</th>
+								<th class="thlsDelay">Total Time</th>
+							</tr>
+						</thead>
+						<tbody id="statistics">
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- The Modal -->
+			<div id="listenersModal" class="modal">
+				<!-- Modal content -->
+				<div class="modal-content-listeners">
+					<span class="close close-listeners">&times;</span>
+					<table class="tablefixed">
+						<thead id="theadListeners" tbodyid="listeners">
+							<tr class="headerRow">
+								<th class="thlscallsign">Callsign</th>
+								<th class="thlsip">IP</th>
+								<th class="thlsport">Port</th>
+								<th class="thlsnetid">NetID</th>
+							</tr>
+						</thead>
+						<tbody id="listeners">
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div name="hbtables" id="hbtables">
+				<div id="insertPoint">
+					<table class="tables tablefixed peers" id="peers">
+						<thead id="theadpeers" tbodyid="peers">
+							<tr class="headerRow">
+								<th class="thpeorder">#</th>
+								<th class="thpecallsign">XLX Peer</th>
+								<th class="thpelastheard">Last Heard</th>
+								<th class="thpelinkedfor">Linked For</th>
+								<th class="thpeprotocol">Protocol</th>
+								<th class="thpemodule">Module</th>
+								<th class="thpeip">IP</th>
+							</tr>
+						</thead>
+						<tbody id="peersBody"></tbody>
+					</table>
+				</div>
+			</div>
+
+			<div id="footer">
+				<div>Copyright (c) 2022 <a href=https://github.com/avrahqedivra/XLXJson>jmc - F4JDN </a>2022.<br>
+				</div> 
+			</div> 
+			<!--THIS COPYRIGHT NOTICE MUST BE DISPLAYED AS A CONDITION OF THE LICENCE GRANT FOR THIS SOFTWARE. ALL DERIVATEIVES WORKS MUST CARRY THIS NOTICE -->
+		</div>
+	</center>
+</body>
+
+<script type="text/javascript">
+	listenerList = [];
+
+	function scrollIntoViewFromId(id) {
+		if (hideAllTG) {
+			hideAllTG = false;
+			$("#insertPoint").show();
+		};
+
+		const el = document.getElementById(id);
+		if (el != null) {
+			el.scrollIntoView(true);
+			el.focus();
+		}
+	}
+
+	function padTo2Digits(num) {
+  	return num.toString().padStart(2, '0');
+	}
+
+	function doPeers(t) {
+		if (t != null) {
+			data = t;
+			
+			var peers = [];
+
+			if (data["LinkedPeers"] != null && data["LinkedPeers"]["Peer"] != null) {
+				if (reflector == "" &&  data["LinkedPeers"]["Reflector"] != null)
+					reflector = data["LinkedPeers"]["Reflector"];
+				
+				peers = data["LinkedPeers"]["Peer"];
+				if (!Array.isArray(peers))
+					peers = [peers];
+			}
+
+			if (version == "" &&  data["Version"] != null) {
+				version = data["Version"];
+				document.getElementById("infoLine").textContent = reflector + " v" + version + " - Dashbaord v1.1.0";
+			}
+
+			let peersLength = peers.length;
+
+			if (peersLength > 0) {
+				$("#peersBody tr").remove();
+			
+				for(let i=0; i < peersLength; i++) {
+					var record = peers[i];
+					var callsign = record.Callsign;
+					var connectTime = new Date(Date.parse(record.ConnectTime));
+					var lastHeardTime = new Date(Date.parse(record.LastHeardTime));
+					var ip = record.IP.split(".");
+					var band = "";
+
+					var diffTime = Math.abs(Date.now() - connectTime.getTime());
+					var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+					diffTime = new Date(diffTime - diffDays * (1000 * 60 * 60 * 24));
+					const hms = padTo2Digits(diffTime.getHours())+":"+padTo2Digits(diffTime.getMinutes())+":"+padTo2Digits(diffTime.getSeconds())
+
+					var bgClass = "tgWhite";
+
+					content = '<tr class=' + bgClass + '>';
+						content += "<td class='tdpeOrder'>" + (i+1) + "</td>";
+						content += "<td class='thpecallsign ellipsis'>" + callsign + "</td>";
+						content += "<td class='lastheard'>" + padTo2Digits(lastHeardTime.getDate())+"."+padTo2Digits(lastHeardTime.getMonth()+1)+"."+lastHeardTime.getFullYear() + " " + padTo2Digits(lastHeardTime.getHours())+":"+padTo2Digits(lastHeardTime.getMinutes()) + "</td>";
+						content += "<td class='tdpelinkedfor'>" + diffDays + " days " + hms + "</td>";
+						content += "<td class='tdpeprotocol'>" + record.Protocol + "</td>";
+						content += "<td class='tdpemodule'>" + record.LinkedModule + "</td>";
+						content += "<td class='tdpeip'>" + "*.*.*." + ip[ip.length-1] + "</td>";
+					content += "</tr>";
+
+					$("#peersBody").append(content);
+				}
+			}
+		}
+	}
+
+	function log(msg) {
+		console.log(msg);
+	};
+
+	// https://htmldom.dev/drag-to-scroll/
+
+	pos = { top: 0, left: 0, x: 0, y: 0 };
+
+	const mouseMoveHandler = function (e) {
+    // How far the mouse has been moved
+    const dx = e.clientX - pos.x;
+    const dy = e.clientY - pos.y;
+
+    // Scroll the element
+    e.scrollTop = pos.top - dy;
+    e.scrollLeft = pos.left - dx;
+	};
+
+	const mouseUpHandler = function (e) {
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+
+    // e.style.cursor = 'grab';
+    // e.style.removeProperty('user-select');
+	};
+
+	const mouseDownHandler = function(e) {
+		// Change the cursor and prevent user from selecting the text
+		// e.style.cursor = 'grabbing';
+		// e.style.userSelect = 'none';
+
+		pos = {
+				// The current scroll
+				left: e.scrollLeft,
+				top: e.scrollTop,
+				// Get the current mouse position
+				x: e.clientX,
+				y: e.clientY,
+		};
+
+		document.addEventListener('mousemove', mouseMoveHandler);
+		document.addEventListener('mouseup', mouseUpHandler);
+	};
+
+	$(document).ready(function () {
+		$(window).click(function (event) {
+			if (event.target == document.getElementById("listenersModal"))
+				$("#listenersModal").hide();
+		});
+
+		$(window).click(function (event) {
+			if (event.target == document.getElementById("statisticsModal"))
+				$("#statisticsModal").hide();
+		});
+
+		$(document).on("click", ".network thead", function () {
+			$("#" + $(this).attr('tbodyid')).toggle(100);
+		});
+
+		$(document).on("click", ".close", function () {
+			$("#statisticsModal").hide();
+			$("#listenersModal").hide();
+		});
+
+		$(document).on("dblclick", "#btnlisteners", function (e) {
+			if (e.ctrlKey) {
+				$("#listeners tr").remove();
+				var content = "";
+
+				listenerList = uniqByKeepLast(listenerList, swl => swl.NETID);
+
+				listenerList.forEach(swl => {
+					content += "<tr class='trlisteners'><td>" + swl.CALLSIGN + "</td><td>" + swl.IP + "</td><td>" + swl
+						.PORT + "</td><td>" + swl.NETID + "</td></tr>";
+				});
+
+				$("#listeners").append(content);
+				$("#listenersModal").show();
+			}
+		});
+	});
+
+	window.onload = () => {
+		reflector = "";
+		version = "";
+		listeners = 0;
+		peers = [];
+		mobileDevice = "<<<MOBILE>>>" == "True";
+
+		var wsuri = "ws://" + window.location.hostname + ":<<<SOCKET_SERVER_PORT>>>?page=peers";
+
+		if (getConfigFromLocalStorage != null)
+			getConfigFromLocalStorage();
+
+		function WSConnection() {
+			'use strict';
+			this.socket = {};
+		}
+
+		WSConnection.prototype.connect = (url) => {
+			'use strict';
+
+			return new Promise((resolve, reject) => {
+				if ("WebSocket" in window)
+					this.socket = new WebSocket(url);
+				else if ("MozWebSocket" in window)
+					this.socket = new MozWebSocket(url);
+				else {
+					log("Browser does not support WebSocket!");
+					resolve();
+				}
+
+				this.socket.onopen = function () {
+						log("Connected to " + url)
+						// this.send(JSON.stringify({
+						// 		"request": "peers"
+						// }));
+						resolve();
+				};
+
+				this.socket.onmessage = (e) => {
+					var data = null;
+
+					try {
+						if (themeSettings == "auto")
+							adjustTheme();
+
+						data = JSON.parse(e.data);
+
+						// console.log("");
+						// console.log(data);
+						// console.log("");
+
+						if (data != null) {
+							if (data.BIGEARS)
+								$("#btnlisteners").text("\uD83D\uDD75 SWL " + data.BIGEARS);
+
+							if (data.LISTENERS)
+								listenerList = data.LISTENERS;
+
+							// FIRST PACKET IS CONFIG
+							if (data.CONFIG) {
+								if (data.CONFIG.BIGEARS) {
+									$("#btnlisteners").text("\uD83D\uDD75 SWL " + data.CONFIG.BIGEARS);
+								}
+
+								if (data.CONFIG.PACKETS)
+									doPeers(data.CONFIG.PACKETS.TRAFFIC);
+
+								if (data.CONFIG.LISTENERS)
+									listenerList = data.CONFIG.LISTENERS;
+							} else {
+								if (data.TRAFFIC)
+									doPeers(data.TRAFFIC);
+
+								if (data.STATUS)
+									log(data.STATUS);
+							}
+					}
+					} catch (error) {
+						log(error);
+					}
+				};
+
+				socket.onerror = function (error) {
+					console.log('WebSocket error: ' + error);
+					reject(error);
+				};
+
+				socket.onclose = function (e) {
+					log("Connection closed (wasClean = " + e.wasClean + ", code = " + e.code + ", reason = '" + e
+						.reason + "')");
+					this.sock = null;
+				};
+			});
+		};
+
+		WSConnection.prototype.disconnect = () => {
+			'use strict';
+			console.log("Disconnect request from local app layer");
+			this.socket.close();
+		};
+
+
+		setTimeout(() => {
+			socket = new WSConnection().connect(wsuri);
+		}, 250);
+	};
+
+	window.onunload = () => {
+		socket = null;
+	}
+</script>
+
+</html>
