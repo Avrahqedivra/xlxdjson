@@ -12,7 +12,7 @@ JSON_SERVER_PORT = 7770                         # Has to be above 1024 if you're
 DISPLAY_LINES =  15                             # number of lines displayed in index_template
 CLIENT_TIMEOUT  = 0                             # Clients are timed out after this many seconds, 0 to disable
 
-XLXD_IP         = '78.121.109.81'               # XLXD server IP address 
+XLXD_IP         = 'xxx.xxx.xxx.xxx'             # your XLXD server IP address 
 XLXD_PORTJSON   = 10001                         # XLXD JSON reporting socket (standard port, check if opened in firewall)
 
 # ids of module to be excluded, for example "A,B,T"
