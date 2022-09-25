@@ -1,0 +1,17 @@
+[Unit]
+Description=XLXD Monitor
+# To make the network-online.target available
+# systemctl enable systemd-networkd-wait-online.service
+
+After=network-online.target syslog.target
+Wants=network-online.target
+
+[Service]
+StandardOutput=null
+RestartSec=3
+WorkingDirectory=/opt/xlxdjson_git
+ExecStart=/usr/bin/python3 /opt/xlxdjson_git/monitor.py
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
