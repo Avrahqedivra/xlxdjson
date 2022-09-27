@@ -385,8 +385,6 @@ def replaceSystemStrings(data):
         .replace("<<<MOD_NAMES>>>", str(MOD_NAMES)) \
         .replace("<<<SOCKET_SERVER_PORT>>>", str(SOCKET_SERVER_PORT)) \
         .replace("<<<DISPLAY_LINES>>>", str(DISPLAY_LINES)) \
-        .replace("<<<LAST_ACTIVE_MOD>>>", str(LAST_ACTIVE_MOD)) \
-        .replace("<<<LAST_ACTIVE_SIZE>>>", str(LAST_ACTIVE_SIZE)) \
         .replace("<<<DYNAMIC_MOD>>>", str(DYNAMIC_MOD))
 
 private_secret = os.urandom(64)

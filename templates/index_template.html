@@ -61,19 +61,8 @@
 	modorder = new Set("<<<MOD_ORDER>>>".split(','));
 	modhilite = new Set("<<<MOD_HILITE>>>".split(','));
 	dynamic_mod = ("<<<DYNAMIC_MOD>>>" == "True") ? true : false;
-	last_active_mod = ("<<<LAST_ACTIVE_MOD>>>" == "True") ? true : false;
 	moduleNumber = "<<<MOD_NUMBER>>>";
 	moduleNames = JSON.parse('<<<MOD_NAMES>>>');
-
-	last_active_size = parseInt("<<<LAST_ACTIVE_SIZE>>>");
-	if (last_active_size == 0) {
-		const [first] = modorder;
-		last_active_size = (first == "") ? 99999:modorder.size;
-	}
-
-	if (last_active_mod == true) {
-		$("#lastActive").css("display", "table");
-	}
 
 	//  https://stackoverflow.com/questions/9229645/remove-duplicate-values-from-js-array
 	// 	traffic = uniqByKeepLast(traffic, rec => rec.CALLSIGN);

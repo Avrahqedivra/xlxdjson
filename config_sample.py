@@ -1,11 +1,5 @@
 REPORT_NAME     = "XLXJSON Monitor for D-STAR"  # Name of the monitored WiresX system
 #
-CONFIG_INC      = True                          # Include HBlink stats
-HOMEBREW_INC    = True                          # Display Homebrew Peers status
-LASTHEARD_INC   = True                          # Display lastheard table on main page
-BRIDGES_INC     = True                          # Display Bridge status and button
-EMPTY_MASTERS   = False                         # Display (True) or not (False) empty master in status
-
 FREQUENCY       = 5                             # Frequency to push updates to web clients
 SOCKET_SERVER_PORT = 9004                       # Websocket server for realtime monitoring
 JSON_SERVER_PORT = 7770                         # Has to be above 1024 if you're not running as root
