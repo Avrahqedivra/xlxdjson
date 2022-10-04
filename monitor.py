@@ -241,7 +241,8 @@ def process_message(data):
 
 def udpWorker(client, socket, buffSize):
     global __signals
-    __SENDING_TIME_OUT = 0.25
+    __SENDING_TIMEOUT = 0.25
+    __KEEPALIVE_TIMEOUT = 0.0
 
     client.refresh()
 
@@ -249,7 +250,14 @@ def udpWorker(client, socket, buffSize):
         data = socket.recvfrom(buffSize)
         if len(data):
             process_message(json.loads(data[0].replace(b"\x01", b"SOH")))
-        ptime.sleep(__SENDING_TIME_OUT)
+
+        ptime.sleep(__SENDING_TIMEOUT)
+
+        # every 5min send keep alive
+        __KEEPALIVE_TIMEOUT = __KEEPALIVE_TIMEOUT + __SENDING_TIMEOUT
+        if __KEEPALIVE_TIMEOUT > 300:
+            __KEEPALIVE_TIMEOUT = 0.0
+            client.sendMessage("hello")
 
 class UDP_Client:
     __connection_port=0
