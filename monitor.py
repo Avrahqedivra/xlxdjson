@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 ###############################################################################
-#   Copyright (C) 2022 Jean-Michel Cohen, F4JDN <f4jdn@outlook.fr>
+#   Copyright (C) 2023 Jean-Michel Cohen, F4JDN <f4jdn@outlook.fr>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -42,7 +42,8 @@ from twisted.protocols.basic import FileSender
 
 from twisted.web import http, server
 from twisted.web.server import Session, Site
-from twisted.web.resource import Resource, NoResource
+from twisted.web.pages import notFound
+from twisted.web.resource import Resource
 
 from twisted.python.url import URL
 from twisted.python.components import registerAdapter
@@ -525,7 +526,7 @@ class staticHtmlFile(Resource):
 
         request.setResponseCode(http.NOT_FOUND)
         request.finish()
-        return NoResource()
+        return notFound()
 
 class staticFile(Resource):
     def __init__(self, file_Name, file_Folder, file_contentType):
@@ -640,7 +641,7 @@ class web_server(Resource):
         elif page.endswith(".ttf"):
             return staticFile(name, "webfonts", "font/ttf;")
 
-        return NoResource()
+        return notFound()
 
     def render_GET(self, request):
         admin_auth = False
